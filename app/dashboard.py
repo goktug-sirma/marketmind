@@ -64,19 +64,19 @@ with tab1:
 
 # --- FORECAST TAB ---
 with tab2:
-    st.subheader("Sales Forecast by Product")
-    days = st.slider("Select forecast horizon (days)", 7, 30, 7)
-    if st.button("🔮 Generate Forecast"):
+    st.subheader("📈 Prophet Forecast (Trend + Seasonality)")
+    days = st.slider("Select forecast horizon (days)", 7, 60, 30)
+    if st.button("🔮 Generate Prophet Forecast"):
         forecast_df = predict_future_sales(df_clean, days)
-
         if not forecast_df.empty:
             st.success(f"Forecast generated for next {days} days ✅")
             for product in forecast_df["product"].unique():
-                product_df = forecast_df[forecast_df["product"] == product]
-                st.write(f"### 📦 {product}")
-                st.line_chart(product_df.set_index("date")["predicted_revenue"])
+                sub = forecast_df[forecast_df["product"] == product]
+                st.write(f"### {product}")
+                st.line_chart(sub.set_index("ds")[["yhat", "yhat_lower", "yhat_upper"]])
         else:
-            st.warning("Not enough data to forecast.")
+            st.warning("Not enough data for Prophet forecasting.")
+
 
 
 # --- MODEL TAB ---
