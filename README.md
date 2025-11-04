@@ -16,6 +16,7 @@ It provides real-time insights, visualizations, and AI-powered forecasts for pro
 ---
 
 ## 🗂️ Project Structure
+```
 marketmind/
 │
 ├── app/
@@ -35,7 +36,7 @@ marketmind/
 ├── requirements.txt
 ├── README.md
 └── main.py
-
+```
 
 ---
 
