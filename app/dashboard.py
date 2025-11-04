@@ -7,13 +7,14 @@ SRC_DIR = ROOT_DIR / "src"
 sys.path.insert(0, str(SRC_DIR))
 sys.path.insert(0, str(ROOT_DIR))
 
+# --- Imports ---
 import streamlit as st
 import pandas as pd
 from data_loader import load_sales_data
 from preprocessor import preprocess_data
 from visualizer import plot_sales_trends
 from model_trainer import train_model
-from forecast import predict_future_sales  # yeni eklendi
+from forecast import predict_future_sales, plot_forecast_components  # 🔮 yeni eklendi
 
 # --- Streamlit UI Config ---
 st.set_page_config(
@@ -66,18 +67,38 @@ with tab1:
 with tab2:
     st.subheader("📈 Prophet Forecast (Trend + Seasonality)")
     days = st.slider("Select forecast horizon (days)", 7, 60, 30)
+
     if st.button("🔮 Generate Prophet Forecast"):
         forecast_df = predict_future_sales(df_clean, days)
         if not forecast_df.empty:
             st.success(f"Forecast generated for next {days} days ✅")
+
             for product in forecast_df["product"].unique():
                 sub = forecast_df[forecast_df["product"] == product]
                 st.write(f"### {product}")
                 st.line_chart(sub.set_index("ds")[["yhat", "yhat_lower", "yhat_upper"]])
+
+            # --- 📊 Trend Analysis Section ---
+            with st.expander("📊 Trend Analysis (Prophet Components)", expanded=False):
+                try:
+                    prophet_df = df.copy()
+                    if "revenue" not in prophet_df.columns:
+                        prophet_df["revenue"] = prophet_df["units_sold"] * prophet_df["unit_price"]
+
+                    prophet_df = prophet_df.rename(columns={"date": "ds", "revenue": "y"})
+                    prophet_df = prophet_df[["ds", "y"]]
+
+                    from prophet import Prophet
+                    m = Prophet()
+                    m.fit(prophet_df)
+                    future = m.make_future_dataframe(periods=days)
+                    forecast = m.predict(future)
+                    fig_components = plot_forecast_components(m, forecast)
+                    st.plotly_chart(fig_components, use_container_width=True)
+                except Exception as e:
+                    st.warning(f"Trend component visualization skipped: {e}")
         else:
             st.warning("Not enough data for Prophet forecasting.")
-
-
 
 # --- MODEL TAB ---
 with tab3:
@@ -92,8 +113,7 @@ with tab3:
         sample_numeric = sample.select_dtypes(include=["number"])
         sample_numeric = sample_numeric.drop(columns=["revenue"], errors="ignore")
         pred = model.predict(sample_numeric)
-
-
+        st.write(f"Predicted Revenue: **{pred[0]:.2f}**")
 
 st.markdown("---")
 st.caption("© 2025 GO Innovations | MarketMind — Forecast & Analytics MVP")

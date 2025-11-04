@@ -29,3 +29,10 @@ def predict_future_sales(df, days_ahead=30):
         results.append(forecast[["ds", "product", "yhat", "yhat_lower", "yhat_upper"]])
 
     return pd.concat(results, ignore_index=True) if results else pd.DataFrame()
+
+def plot_forecast_components(model, forecast):
+    """Prophet bileşen grafikleri (trend, weekly, yearly) döndürür."""
+    from prophet.plot import plot_components_plotly
+    import plotly.io as pio
+    fig = plot_components_plotly(model, forecast)
+    return fig
