@@ -1,0 +1,7 @@
+[theme]
+base = "dark"
+primaryColor = "#4ADE80"         # Yeşil vurgu (GO Innovations)
+backgroundColor = "#0F172A"      # Lacivertimsi koyu arka plan
+secondaryBackgroundColor = "#1E293B"  # Kart ve sidebar rengi
+textColor = "#F1F5F9"            # Açık metin rengi
+font = "sans serif"
